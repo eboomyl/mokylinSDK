@@ -9,11 +9,11 @@ import com.mokylin.log.http.Client;
 import com.mokylin.log.logdisruptor.DataEvent;
 import com.mokylin.log.logdisruptor.DataEventFactory;
 import com.mokylin.log.logdisruptor.DataEventHandler;
+import com.mokylin.log.model.BaseModel;
 import com.mokylin.log.sendfiledisruptor.FileEvent;
 import com.mokylin.log.sendfiledisruptor.FileEventFactory;
 import com.mokylin.log.sendfiledisruptor.FileEventHandler;
 import com.mokylin.log.util.ExecutorsUtils;
-import com.mokylin.log.model.LogModel;
 import com.mokylin.log.util.ConstantsUtils;
 import com.mokylin.log.util.StringMap;
 import com.mokylin.log.util.StringUtils;
@@ -158,8 +158,8 @@ public class LogManager  {
         return this;
     }
 
-    public LogManager setLogModel(LogModel logModel) {
-
+    public LogManager setLogModel(BaseModel logModel) {
+        this.stringMap.putAll(logModel.getDtoToStringMap());
         //TODO 方法实现
         return this;
     }
