@@ -22,7 +22,7 @@ public class LogManagerTest {
             LogManager.Type("login"+i).setLogModel(heroModel).set("test2", "value1").set("test2", 123).commit();
         }
         System.out.println("11111");
-       // LogManager.stop();
+        LogManager.stop();
         System.out.println(LogManager.getMilliTimeSpan());
     }
 }

@@ -36,7 +36,7 @@ public class LogManager  {
     private static String accessKey;
     private static String secretKey;
     private static ExecutorService dataExecutor;
-    private static ExecutorService fileExecutor;
+   // private static ExecutorService fileExecutor;
     private static RingBuffer<DataEvent> ringbuffer;
     private static Disruptor<DataEvent> disruptor;
     private static DataEventHandler handler;
@@ -56,14 +56,14 @@ public class LogManager  {
         handler = new DataEventHandler();
         fileHandler = new FileEventHandler();
 
-        dataExecutor = Executors.newSingleThreadExecutor();
-        fileExecutor = Executors.newSingleThreadExecutor();
+        dataExecutor = Executors.newCachedThreadPool();
+       // fileExecutor = Executors.newSingleThreadExecutor();
         disruptor = new Disruptor<DataEvent>(new DataEventFactory(), bufferSize,
                 dataExecutor, ProducerType.SINGLE,
                 YIELDING_WAIT);
 
         filedisruptor =   new Disruptor<FileEvent>(new FileEventFactory(), bufferSize,
-                fileExecutor, ProducerType.SINGLE,
+                dataExecutor, ProducerType.SINGLE,
                 YIELDING_WAIT);
     }
 
@@ -130,7 +130,7 @@ public class LogManager  {
         disruptor.shutdown();
         filedisruptor.shutdown();
         ExecutorsUtils.shutdownAndAwaitTermination(dataExecutor,10, TimeUnit.SECONDS);
-        ExecutorsUtils.shutdownAndAwaitTermination(fileExecutor,10, TimeUnit.SECONDS);
+        //ExecutorsUtils.shutdownAndAwaitTermination(fileExecutor,10, TimeUnit.SECONDS);
         endTicks = System.currentTimeMillis();
     }
 
@@ -173,6 +173,7 @@ public class LogManager  {
         }
     }
 
+    //发送文件
     public static void setLogFilePath(String logFilePath) {
         //读取目录下的所有日志文件
         Client client = new Client();
@@ -183,6 +184,8 @@ public class LogManager  {
     public static long getMilliTimeSpan(){
         return endTicks-startTicks;
     }
+
+
 
 
 }

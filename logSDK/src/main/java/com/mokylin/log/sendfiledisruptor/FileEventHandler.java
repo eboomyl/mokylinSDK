@@ -1,6 +1,7 @@
 package com.mokylin.log.sendfiledisruptor;
 
 import com.lmax.disruptor.EventHandler;
+import com.mokylin.log.http.Client;
 import com.mokylin.log.util.ConstantsUtils;
 import com.mokylin.log.util.StringUtils;
 
@@ -16,15 +17,15 @@ public class FileEventHandler  implements EventHandler<FileEvent> {
     @Override
     public void onEvent(FileEvent fileEvent, long l, boolean b) throws Exception {
         //发送文件
-        System.out.println("发送文件");
-
+       // System.out.println("发送文件");
         File sendFile  = fileEvent.getSendFile();
+//        Client client = new Client();
+//        client.setSendFiles(sendFile);
+//        client.sendFile();
+
+        //发送文件后改名
         File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_sendover_"+ StringUtils.getNowDate());
         //发送完毕文件改名为已发送状态 logFileUpload_over_yyyyMMddHHmmss
         sendFile.renameTo(renameFile);
-
-
-
-
     }
 }
