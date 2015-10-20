@@ -82,19 +82,17 @@ public class Client {
     //读取目录下需要发送的文件
     public void getFiles(String filePath) {
         File[] files = new File(filePath).listFiles();
-
-
         for (File file : files) {
                 if (file.isDirectory()) {
                     getFiles(file.getPath());
                 } else {
                     //文件大小超过 30K则发送，
-                    if(file.length()>30720&&ConstantsUtils.LOG_CONTANT_FILE_NAME.equals(file.getName())){
-                        //改名为logFileUpload
-                        File renameFile = new File(file.getParent()+File.separator+ConstantsUtils.LOG_CONTANT_UPLOAD);
-                        file.renameTo(renameFile);
-                        sendFiles.add(renameFile);
-                    }
+//                    if(file.length()>30720&&ConstantsUtils.LOG_CONTANT_FILE_NAME.equals(file.getName())){
+//                        //改名为logFileUpload
+//                        File renameFile = new File(file.getParent()+File.separator+ConstantsUtils.LOG_CONTANT_UPLOAD);
+//                        file.renameTo(renameFile);
+                        sendFiles.add(file);
+//                    }
 
                 }
         }
