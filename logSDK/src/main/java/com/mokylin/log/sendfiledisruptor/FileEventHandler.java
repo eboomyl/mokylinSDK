@@ -8,6 +8,7 @@ import com.mokylin.log.util.StringUtils;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by Administrator on 2015/10/10.
@@ -24,7 +25,13 @@ public class FileEventHandler  implements EventHandler<FileEvent> {
 //        client.sendFile();
 
         //发送文件后改名
-        File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_sendover_"+ StringUtils.getNowDate());
+
+        String uuidStr =StringUtils.getUUID();
+
+        String nowDate =  StringUtils.getNowDate();
+        System.out.println("file-" + nowDate);
+        System.out.println("file-count"+l);
+        File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_send_"+nowDate+ "_"+uuidStr);
         //发送完毕文件改名为已发送状态 logFileUpload_over_yyyyMMddHHmmss
         sendFile.renameTo(renameFile);
     }

@@ -3,6 +3,7 @@ package com.mokylin.log.util;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by Administrator on 2015/9/15.
@@ -112,6 +113,11 @@ public class StringUtils {
     public static String getNowDate(){
         SimpleDateFormat ymdStrFormat = new SimpleDateFormat("yyyyMMddHHmmss");
          return ymdStrFormat.format(new Date());
+    }
+
+    public static String getUUID(){
+        UUID uuid = UUID.randomUUID();
+        return uuid.toString();
     }
 
 }

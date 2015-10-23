@@ -6,7 +6,7 @@ import com.mokylin.log.model.HeroModel;
  * Created by Administrator on 2015/9/21.
  */
 public class LogManagerTest {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws Exception {
         LogManager.auth("yuanlin","yuanlin");
         int date_count = 100000;
         HeroModel heroModel =  new HeroModel();

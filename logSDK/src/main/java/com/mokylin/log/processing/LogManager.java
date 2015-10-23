@@ -1,8 +1,6 @@
 package com.mokylin.log.processing;
 
-import com.lmax.disruptor.RingBuffer;
-import com.lmax.disruptor.WaitStrategy;
-import com.lmax.disruptor.YieldingWaitStrategy;
+import com.lmax.disruptor.*;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.mokylin.log.http.Client;
@@ -18,6 +16,7 @@ import com.mokylin.log.util.ConstantsUtils;
 import com.mokylin.log.util.StringMap;
 import com.mokylin.log.util.StringUtils;
 
+import java.awt.*;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,10 +32,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class LogManager  {
     private static final WaitStrategy YIELDING_WAIT = new YieldingWaitStrategy();
+    private static final  WaitStrategy BLOCKING_WAIT = new BlockingWaitStrategy();
+    private static final  WaitStrategy SLEEPING_WAIT = new SleepingWaitStrategy();
     private static String accessKey;
     private static String secretKey;
     private static ExecutorService dataExecutor;
-   // private static ExecutorService fileExecutor;
+    private static ExecutorService fileExecutor;
     private static RingBuffer<DataEvent> ringbuffer;
     private static Disruptor<DataEvent> disruptor;
     private static DataEventHandler handler;
@@ -48,22 +49,24 @@ public class LogManager  {
     private static int bufferSize = 1024*1024;
     private static long startTicks;
     private static long endTicks;
+    private static Client client = new Client();
 
     public  List<StringMap> stringMapList;
     private StringMap stringMap;
+
 
     static{
         handler = new DataEventHandler();
         fileHandler = new FileEventHandler();
 
-        dataExecutor = Executors.newCachedThreadPool();
-       // fileExecutor = Executors.newSingleThreadExecutor();
+        dataExecutor = Executors.newFixedThreadPool(20);
+        fileExecutor = Executors.newFixedThreadPool(20);
         disruptor = new Disruptor<DataEvent>(new DataEventFactory(), bufferSize,
                 dataExecutor, ProducerType.SINGLE,
                 YIELDING_WAIT);
 
         filedisruptor =   new Disruptor<FileEvent>(new FileEventFactory(), bufferSize,
-                dataExecutor, ProducerType.SINGLE,
+                fileExecutor, ProducerType.SINGLE,
                 YIELDING_WAIT);
     }
 
@@ -97,6 +100,7 @@ public class LogManager  {
         } finally {
             //发布事件
             ringbuffer.publish(sequence);
+
         }
     }
 
@@ -126,21 +130,40 @@ public class LogManager  {
 
     }
 
-    public static void stop() {
+    public static void stop() throws Exception {
         disruptor.shutdown();
         filedisruptor.shutdown();
         ExecutorsUtils.shutdownAndAwaitTermination(dataExecutor,10, TimeUnit.SECONDS);
-        //ExecutorsUtils.shutdownAndAwaitTermination(fileExecutor,10, TimeUnit.SECONDS);
+        ExecutorsUtils.shutdownAndAwaitTermination(fileExecutor,10, TimeUnit.SECONDS);
         endTicks = System.currentTimeMillis();
+        sendLogFileEnd();
+    }
+
+    private static void sendLogFileEnd() throws Exception {
+        //发送最后一个文件
+         List<File> sendFiles = client.getLogFilesEnd(ConstantsUtils.BASE_FILE_PATH);
+         for(File sendFile:sendFiles){
+            // client.setSendFiles(sendFile);
+            //client.sendFile();
+             String nowDate =  StringUtils.getNowDate();
+             File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_send_"+nowDate+"_over");
+             sendFile.renameTo(renameFile);
+         }
+//        if (sendFile.exists()) {
+//            // client.setSendFiles(logfile);
+//            //client.sendFile();
+//            String nowDate =  StringUtils.getNowDate();
+//            System.out.println("file-"+nowDate);
+//            File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_sendover_"+ nowDate);
+//            //发送完毕文件改名为已发送状态 logFileUpload_over_yyyyMMddHHmmss
+//             sendFile.renameTo(renameFile);
+//        }
     }
 
 
-
     public static LogManager Type(String logType) {
-        SimpleDateFormat ymdStrFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-        String nowDate = ymdStrFormat.format(new Date());
-        UUID uuid = UUID.randomUUID();
-        String uuidStr = uuid.toString();
+        String nowDate = StringUtils.getNowDate();
+        String uuidStr = StringUtils.getUUID();
 
         LogManager logManager = new LogManager();
         logManager.stringMap.put(ConstantsUtils.LOG_TYPE, logType);
@@ -176,7 +199,6 @@ public class LogManager  {
     //发送文件
     public static void setLogFilePath(String logFilePath) {
         //读取目录下的所有日志文件
-        Client client = new Client();
         client.getFiles(logFilePath);
         client.sendFile();
     }
@@ -184,8 +206,6 @@ public class LogManager  {
     public static long getMilliTimeSpan(){
         return endTicks-startTicks;
     }
-
-
 
 
 }

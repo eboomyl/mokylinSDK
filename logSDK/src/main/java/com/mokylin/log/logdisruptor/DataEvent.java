@@ -8,6 +8,7 @@ import java.util.List;
  * Created by Administrator on 2015/10/10.
  */
 public class DataEvent{
+
     private List<StringMap> stringMapList;
 
     public List<StringMap> getStringMapList() {

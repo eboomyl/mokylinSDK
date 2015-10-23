@@ -97,6 +97,24 @@ public class Client {
                 }
         }
     }
+
+
+    //读取目录下需要发送的文件
+    public List<File> getLogFilesEnd(String filePath) {
+        List<File> returnFileList=new ArrayList<>();
+        File[] files = new File(filePath).listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                getFiles(file.getPath());
+            } else {
+                if(ConstantsUtils.LOG_CONTANT_FILE_NAME.equals(file.getName())) {
+                    returnFileList.add(file);
+                }
+            }
+        }
+        return returnFileList;
+    }
+
 }
 
 class CustomFilePart extends FilePart {
