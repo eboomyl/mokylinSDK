@@ -25,13 +25,13 @@ public class FileEventHandler  implements EventHandler<FileEvent> {
 //        client.sendFile();
 
         //发送文件后改名
-
-        String uuidStr =StringUtils.getUUID();
+        UUID uuid = UUID.randomUUID();
+        String uuidStr = uuid.toString();
 
         String nowDate =  StringUtils.getNowDate();
         System.out.println("file-" + nowDate);
         System.out.println("file-count"+l);
-        File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_send_"+nowDate+ "_"+uuidStr);
+        File renameFile = new File(sendFile.getParent()+File.separator+ ConstantsUtils.LOG_CONTANT_UPLOAD+"_send"+nowDate+"_"+uuidStr);
         //发送完毕文件改名为已发送状态 logFileUpload_over_yyyyMMddHHmmss
         sendFile.renameTo(renameFile);
     }

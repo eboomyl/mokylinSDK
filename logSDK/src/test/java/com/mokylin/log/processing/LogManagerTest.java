@@ -7,6 +7,7 @@ import com.mokylin.log.model.HeroModel;
  */
 public class LogManagerTest {
     public static void main(String[] args) throws Exception {
+        LogManager.stop();
         LogManager.auth("yuanlin","yuanlin");
         int date_count = 100000;
         HeroModel heroModel =  new HeroModel();
@@ -22,7 +23,6 @@ public class LogManagerTest {
             LogManager.Type("login"+i).setLogModel(heroModel).set("test2", "value1").set("test2", 123).commit();
         }
         System.out.println("11111");
-        LogManager.stop();
         System.out.println(LogManager.getMilliTimeSpan());
     }
 }
