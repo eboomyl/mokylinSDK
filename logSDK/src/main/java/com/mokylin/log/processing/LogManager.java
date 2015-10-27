@@ -59,15 +59,18 @@ public class LogManager  {
         handler = new DataEventHandler();
         fileHandler = new FileEventHandler();
 
+        //设置线程池策略
         dataExecutor = Executors.newFixedThreadPool(20);
         fileExecutor = Executors.newFixedThreadPool(20);
+
+
         disruptor = new Disruptor<DataEvent>(new DataEventFactory(), bufferSize,
                 dataExecutor, ProducerType.SINGLE,
-                YIELDING_WAIT);
+                BLOCKING_WAIT);
 
         filedisruptor =   new Disruptor<FileEvent>(new FileEventFactory(), bufferSize,
                 fileExecutor, ProducerType.SINGLE,
-                YIELDING_WAIT);
+                BLOCKING_WAIT);
     }
 
     private LogManager(){
@@ -89,7 +92,7 @@ public class LogManager  {
         }
     }
 
-
+    //写日志数据到文件
     public static void dataPublish(List<StringMap> data) throws Exception {
         //可以把ringBuffer看做一个事件队列，那么next就是得到下面一个事件槽
         long sequence = ringbuffer.next();
@@ -104,6 +107,7 @@ public class LogManager  {
         }
     }
 
+    //读取文件发送
     public static void filePublish(File file) throws Exception {
         //可以把ringBuffer看做一个事件队列，那么next就是得到下面一个事件槽
         long sequence = fileRingbuffer.next();
@@ -119,7 +123,9 @@ public class LogManager  {
 
 
     public static void start() {
+        //计算日志处理时间
         startTicks = System.currentTimeMillis();
+        //启动disruptor
         disruptor.handleEventsWith(handler);
         disruptor.start();
         ringbuffer = disruptor.getRingBuffer();
@@ -131,11 +137,14 @@ public class LogManager  {
     }
 
     public static void stop() throws Exception {
+        //disruptor 关闭
         disruptor.shutdown();
         filedisruptor.shutdown();
         ExecutorsUtils.shutdownAndAwaitTermination(dataExecutor,10, TimeUnit.SECONDS);
         ExecutorsUtils.shutdownAndAwaitTermination(fileExecutor,10, TimeUnit.SECONDS);
         endTicks = System.currentTimeMillis();
+
+        //日志尾单处理
         sendLogFileEnd();
     }
 
@@ -160,7 +169,7 @@ public class LogManager  {
 //        }
     }
 
-
+    //设置日志类型，日志类型为目录名
     public static LogManager Type(String logType) {
         String nowDate = StringUtils.getNowDate();
         String uuidStr = StringUtils.getUUID();
@@ -181,12 +190,13 @@ public class LogManager  {
         return this;
     }
 
+
     public LogManager setLogModel(BaseModel logModel) {
         this.stringMap.putAll(logModel.getDtoToStringMap());
-        //TODO 方法实现
         return this;
     }
 
+    //每条日志提交一次，写入日志文件
     public void commit(){
         try {
             this.stringMapList.add(this.stringMap);
@@ -203,6 +213,7 @@ public class LogManager  {
         client.sendFile();
     }
 
+    //计算日志处理时间单位ms
     public static long getMilliTimeSpan(){
         return endTicks-startTicks;
     }
